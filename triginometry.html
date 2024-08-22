@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trigonometry Tool</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@11.9.0/dist/math.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e8f0fe;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 900px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .header a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .header a:hover {
+            color: #0056b3;
+        }
+
+        .sidebar {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .trig-buttons {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .trig-buttons button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .trig-buttons button:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .screen {
+            width: 100%;
+            max-width: 100%;
+            padding: 15px;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            background-color: #ffffff;
+            font-size: 20px;
+            text-align: center;
+            height: 50px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            width: 70%;
+            padding-left: 20px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 400px;
+        }
+
+        .clear-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .clear-button:hover {
+            background-color: #c82333;
+        }
+
+        .input-container {
+            margin-top: 20px;
+        }
+
+        .input-container input {
+            width: calc(100% - 120px);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #007bff;
+            font-size: 18px;
+            margin-right: 10px;
+        }
+
+        .input-container button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .input-container button:hover {
+            background-color: #218838;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="header">
+                <a href="index.html">Home</a>
+                <a href="conversion.html">Conversions</a>
+            </div>
+            <div class="trig-buttons">
+                <button style="background-color: #ff6347;" onclick="toggleGraph('sin', '#ff6347')">Sin</button>
+                <button style="background-color: #4682b4;" onclick="toggleGraph('cos', '#4682b4')">Cos</button>
+                <button style="background-color: #32cd32;" onclick="toggleGraph('tan', '#32cd32')">Tan</button>
+                <button style="background-color: #ffd700;" onclick="toggleGraph('cot', '#ffd700')">Cot</button>
+                <button style="background-color: #8a2be2;" onclick="toggleGraph('sec', '#8a2be2')">Sec</button>
+                <button style="background-color: #ff1493;" onclick="toggleGraph('csc', '#ff1493')">Csc</button>
+                <button class="clear-button" onclick="clearGraph()">Clear</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Screen for Displaying Calculations -->
+            <div class="screen" id="screen"></div>
+
+            <!-- Canvas for Graphs -->
+            <canvas id="trigGraph"></canvas>
+
+            <!-- Input and Calculate Section -->
+           
+
+            <!-- Result Display -->
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('trigGraph').getContext('2d');
+        let chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 721 }, (_, i) => i - 360), // -360 to 360 degrees
+                datasets: []
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Degrees'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        },
+                        min: -3,
+                        max: 3
+                    }
+                }
+            }
+        });
+
+        function toggleGraph(type, color) {
+            const datasetIndex = chart.data.datasets.findIndex(ds => ds.label === `${type}(x)`);
+            
+            if (datasetIndex !== -1) {
+                chart.data.datasets.splice(datasetIndex, 1);
+            } else {
+                const data = [];
+
+                for (let x = -360; x <= 360; x += 1) {
+                    const radian = x * (Math.PI / 180);
+                    let y;
+
+                    switch (type) {
+                        case 'sin':
+                            y = Math.sin(radian);
+                            break;
+                        case 'cos':
+                            y = Math.cos(radian);
+                            break;
+                        case 'tan':
+                            y = Math.tan(radian);
+                            break;
+                        case 'cot':
+                            y = 1 / Math.tan(radian);
+                            break;
+                        case 'sec':
+                            y = 1 / Math.cos(radian);
+                            break;
+                        case 'csc':
+                            y = 1 / Math.sin(radian);
+                            break;
+                    }
+
+                    // Limit y values and handle infinity for all functions
+                    if (y > 3 || y < -3 || !isFinite(y)) {
+                        data.push(null); // Don't plot infinite values
+                    } else {
+                        data.push(y);
+                    }
+                }
+
+                chart.data.datasets.push({
+                    label: `${type}(x)`,
+                    data: data,
+                    borderColor: color,
+                    fill: false,
+                    tension: 0.1
+                });
+            }
+
+            chart.update();
+            document.getElementById('screen').textContent = chart.data.datasets.map(ds => ds.label).join(', ');
+        }
+
+        function clearGraph() {
+            chart.data.datasets = [];
+            chart.update();
+            document.getElementById('screen').textContent = '';
+            document.getElementById('result').textContent = '';
+        }
+
+        function calculateExpression() {
+            const expression = document.getElementById('expression').value;
+
+            try {
+                // Use mathjs to evaluate the expression
+                const result = math.evaluate(expression);
+                document.getElementById('result').textContent = `Result: ${result}`;
+            } catch (error) {
+                console.error('Error evaluating expression:', error);
+                document.getElementById('result').textContent = 'Error in expression';
+            }
+        }
+    </script>
+</body>
+</html>

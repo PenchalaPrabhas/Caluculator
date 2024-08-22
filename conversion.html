@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colorful Conversion Tool</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e8f0fe;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .converter {
+            width: 90%;
+            max-width: 600px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .header a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .header a:hover {
+            color: #0056b3;
+        }
+
+        .converter h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .converter select {
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            border: 2px solid #007bff;
+            background-color: #f1f1f1;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .row label {
+            width: 45%;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .row input {
+            width: 45%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: 2px solid #007bff;
+            background-color: #f9f9f9;
+        }
+
+        .converter button {
+            width: 48%;
+            padding: 12px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .converter .convert {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .converter .convert:hover {
+            background-color: #0056b3;
+        }
+
+        .converter .clear {
+            background-color: #ff5252;
+            color: white;
+        }
+
+        .converter .clear:hover {
+            background-color: #ff0000;
+        }
+
+        .result {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 22px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="converter">
+        <div class="header">
+            <a href="index.html">Home</a>
+            <a href="triginometry.html">Trigonometry</a>
+        </div>
+        <h2>Unit Conversion</h2>
+
+        <!-- Dropdown for Conversion Categories -->
+        <select id="conversionType" onchange="populateUnits()">
+            <option value="weights">Weights</option>
+            <option value="heights">Heights</option>
+            <option value="temperature">Temperature</option>
+            
+            <option value="power">Power</option>
+            <option value="energy">Energy</option>
+            <option value="force">Force</option>
+            <option value="pressure">Pressure</option>
+            <option value="energyDensity">Energy Density</option>
+            <option value="electricity">Electricity</option>
+            <option value="radiation">Radiation</option>
+            <option value="frequency">Frequency</option>
+            <option value="magneticField">Magnetic Field</option>
+        </select>
+
+        <!-- Input and Conversion Units -->
+        <div class="row">
+            <div>
+                <label for="value">From:</label>
+                <select id="fromUnit"></select>
+                <input type="number" id="value" placeholder="Enter value">
+            </div>
+
+            <div>
+                <label for="convertedValue">To:</label>
+                <select id="toUnit"></select>
+                <input type="text" id="convertedValue" placeholder="Converted value" disabled>
+            </div>
+        </div>
+
+        <!-- Buttons for Convert and Clear -->
+        <div class="row">
+            <button class="convert" onclick="convert()">Convert</button>
+            <button class="clear" onclick="clearFields()">Clear</button>
+        </div>
+
+        <!-- Display Result -->
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const units = {
+            weights: {
+                "Kilograms": 1,
+                "Grams": 1000,
+                "Pounds": 2.20462,
+                "Ounces": 35.274
+            },
+            heights: {
+                "Meters": 1,
+                "Centimeters": 100,
+                "Feet": 3.28084,
+                "Inches": 39.3701
+            },
+            temperature: {
+                "Celsius (°C)": 1,
+                "Fahrenheit (°F)": 1,
+                "Kelvin (K)": 1
+            },
+           
+            power: {
+                "Watts (W)": 1,
+                "Kilowatts (kW)": 0.001,
+                "Megawatts (MW)": 0.000001,
+                "Horsepower (HP)": 0.001341
+            },
+            energy: {
+                "Joules (J)": 1,
+                "Kilojoules (kJ)": 0.001,
+                "Megajoules (MJ)": 0.000001,
+                "Calories (cal)": 0.239006,
+                "Kilocalories (kcal)": 0.000239
+            },
+            force: {
+                "Newtons (N)": 1,
+                "Kilonewtons (kN)": 0.001,
+                "Pound-force (lbf)": 0.224809
+            },
+            pressure: {
+                "Pascals (Pa)": 1,
+                "Kilopascals (kPa)": 0.001,
+                "Megapascals (MPa)": 0.000001,
+                "Atmospheres (atm)": 0.0000098692,
+                "Bar": 0.00001,
+                "Torr": 0.007501
+            },
+            energyDensity: {
+                "Joules per Cubic Meter (J/m³)": 1,
+                "Watt-hours per Cubic Meter (Wh/m³)": 0.00027778
+            },
+            electricity: {
+                "Volts (V)": 1,
+                "Amperes (A)": 1,
+                "Ohms (Ω)": 1,
+                "Watts (W)": 1,
+                "Kilowatt-hours (kWh)": 0.00027778
+            },
+            radiation: {
+                "Gray (Gy)": 1,
+                "Sievert (Sv)": 1
+            },
+            frequency: {
+                "Hertz (Hz)": 1,
+                "Kilohertz (kHz)": 0.001,
+                "Megahertz (MHz)": 0.000001
+            },
+            magneticField: {
+                "Tesla (T)": 1,
+                "Gauss (G)": 10000
+            }
+        };
+
+        // Populate units based on selected category
+        function populateUnits() {
+            let conversionType = document.getElementById('conversionType').value;
+            let fromUnit = document.getElementById('fromUnit');
+            let toUnit = document.getElementById('toUnit');
+
+            fromUnit.innerHTML = '';
+            toUnit.innerHTML = '';
+
+            for (let unit in units[conversionType]) {
+                let option1 = document.createElement('option');
+                option1.value = unit;
+                option1.text = unit;
+                fromUnit.add(option1);
+
+                let option2 = document.createElement('option');
+                option2.value = unit;
+                option2.text = unit;
+                toUnit.add(option2);
+            }
+        }
+
+        // Convert between units
+        function convert() {
+            let conversionType = document.getElementById('conversionType').value;
+            let fromUnit = document.getElementById('fromUnit').value;
+            let toUnit = document.getElementById('toUnit').value;
+            let value = parseFloat(document.getElementById('value').value);
+            let resultElement = document.getElementById('result');
+
+            if (isNaN(value)) {
+                resultElement.textContent = 'Please enter a valid number.';
+                return;
+            }
+
+            let fromFactor = units[conversionType][fromUnit];
+            let toFactor = units[conversionType][toUnit];
+            let convertedValue;
+
+            if (conversionType === 'temperature') {
+                if (fromUnit === 'Celsius (°C)' && toUnit === 'Fahrenheit (°F)') {
+                    convertedValue = (value * 9/5) + 32;
+                } else if (fromUnit === 'Fahrenheit (°F)' && toUnit === 'Celsius (°C)') {
+                    convertedValue = (value - 32) * 5/9;
+                } else if (fromUnit === 'Celsius (°C)' && toUnit === 'Kelvin (K)') {
+                    convertedValue = value + 273.15;
+                } else if (fromUnit === 'Kelvin (K)' && toUnit === 'Celsius (°C)') {
+                    convertedValue = value - 273.15;
+                } else if (fromUnit === 'Fahrenheit (°F)' && toUnit === 'Kelvin (K)') {
+                    convertedValue = (value - 32) * 5/9 + 273.15;
+                } else if (fromUnit === 'Kelvin (K)' && toUnit === 'Fahrenheit (°F)') {
+                    convertedValue = (value - 273.15) * 9/5 + 32;
+                } else {
+                    convertedValue = value; // same unit conversion
+                }
+            } else {
+                convertedValue = value * (toFactor / fromFactor);
+            }
+
+            document.getElementById('convertedValue').value = convertedValue;
+            resultElement.textContent = `${value} ${fromUnit} equals ${convertedValue} ${toUnit}`;
+        }
+
+        // Clear input fields and result
+        function clearFields() {
+            document.getElementById('value').value = '';
+            document.getElementById('convertedValue').value = '';
+            document.getElementById('result').textContent = '';
+        }
+
+        // Populate units on page load
+        window.onload = populateUnits;
+    </script>
+
+</body>
+</html>
